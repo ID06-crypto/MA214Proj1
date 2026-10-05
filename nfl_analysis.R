@@ -24,3 +24,9 @@ nfl_data |>
   theme_minimal()
 
 # win_loss_perc ~ penalties
+
+# fumbles ~ penalties, looking for any possible collinearity
+ggplot(nfl_data, aes(x = fumbles_lost, y = penalties)) +
+  geom_point(color = "blue", size = 2) +
+  theme_minimal() +
+  labs(title = "Scatterplot between fumbles and penatlies", x = "Fumbles Lost", y = "Penalties")
