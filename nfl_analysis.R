@@ -23,8 +23,7 @@ nfl_data |>
   labs(title = "Density of Penalties (Season)")
   theme_minimal()
 
-# win_loss_perc ~ penalties
-
+penalties_normalized = min_max_norm
 # fumbles ~ penalties, looking for any possible collinearity
 ggplot(nfl_data, aes(x = fumbles_lost, y = penalties)) +
   geom_point(color = "blue", size = 2) +
@@ -34,4 +33,17 @@ ggplot(nfl_data, aes(x = fumbles_lost, y = penalties)) +
 # Correlation between penalties and fumbles lost
 cor(nfl_data$penalties, nfl_data$fumbles_lost) # ~0.0711
 
+# =============
 # Model Fitting
+# =============
+
+# 
+nfl_data |>
+  ggplot(aes(x = scale(penalties), y = scale(win_loss_perc))) +
+  geom_point() +
+  labs(title = "winn_loss_perc ~ penalties", 
+       x = "Penalties (scaled)", 
+       y = "Winn/Loss Percentage (scaled)") +
+  theme_minimal()
+
+cor(nfl_data$penalties, nfl_data$win_loss_perc)
