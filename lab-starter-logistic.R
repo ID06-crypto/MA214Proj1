@@ -16,16 +16,71 @@ library(ggplot2)
 # 1. Loading the data
 # ------------------------------------------------------------
 
-# raw_data <- read_csv("my_data.csv")                      # <- EDIT: your data file
-raw_data <- mtcars                                         # <- EDIT: delete this line
+raw_data <- read_csv("team_stats_2003_2023.csv")                      # <- EDIT: your data file
 
-clean_data <- raw_data |>                                  # <- EDIT: your cleaning steps
-  mutate(am = factor(am, levels = 0:1, labels = c("automatic", "manual")))
+# Keep or drop columns.
+select(raw_data, -ties)                     # drop ties, not relevant to our research question
+
+# Rename cols with long names, easier to type
+rename(raw_data, win_pct = win_loss_perc, yds_play = yds_per_play_offense)
+
+# Remove impossible values or rows outside your question.
+# Checked for impossible values and didn't find any, none dropped.
+
+# Derived variable margin of victory -> margin per game because mov had a lot of missing vals in og dataset
+mutate(raw_data, margin_pg = points_diff / g)
+
+# Group renamed teams by franchise (to get 32 unique NFL teams).
+mutate(raw_data, franchise = case_when(
+  grepl("Redskins|Football Team|Commanders", team) ~ "Washington",
+  grepl("Raiders",  team)                          ~ "Raiders",
+  grepl("Chargers", team)                          ~ "Chargers",
+  grepl("Rams",     team)                          ~ "Rams",
+  TRUE                                             ~ team))
+
+# Changed to per game metrics, so 16- and 17-game seasons are comparable.
+mutate(raw_data,
+       to_pg  = turnovers / g,
+       pen_pg = penalties / g,
+       opp_pg = points_opp / g)
+
+# Putting the steps together with the pipe |>
+clean_data <- raw_data |>
+  
+  # mov has a lot of missing vals, so rebuild it for every row
+  mutate(margin_pg = points_diff / g) |>
+  # group together renamed teams by franchise to get 32 unique NFL teams
+  mutate(franchise = case_when(
+    grepl("Redskins|Football Team|Commanders", team) ~ "Washington",
+    grepl("Raiders",  team)                          ~ "Raiders",
+    grepl("Chargers", team)                          ~ "Chargers",
+    grepl("Rams",     team)                          ~ "Rams",
+    TRUE                                             ~ team)) |>
+  # 2021 to 2023 have 17 games, so compare totals per game
+  mutate(to_pg  = turnovers / g,
+         pen_pg = penalties / g,
+         opp_pg = points_opp / g) |>
+  # group years into three equal eras, in time order, to mirror in class dataset + see if metrics/predictors change through time
+  mutate(era = case_when(
+    year <= 2009 ~ "2003-09",
+    year <= 2016 ~ "2010-16",
+    TRUE         ~ "2017-23")) |>
+  mutate(era = factor(era, levels = c("2003-09", "2010-16", "2017-23"))) |>
+  # shorter names
+  rename(win_pct = win_loss_perc,
+         yds_play = yds_per_play_offense)
+
+
+nrow(raw_data)               # rows before cleaning (672)
+nrow(clean_data)             # rows after cleaning (672)
+colSums(is.na(clean_data))   # should all be 0
+n_distinct(clean_data$franchise)   # 32
+
 
 # 1b. Name your variables. Use the column names in clean_data, in quotes.
-response   <- "vs"                                         # <- EDIT: binary, coded 0/1
-predictors <- c("hp", "wt")                                # <- EDIT: at least two numerical
-group_var  <- "am"                                         # <- EDIT: one categorical variable
+response   <- "win_pct"                                         # <- EDIT: binary, coded 0/1
+predictors <- c("turnovers", "fumbles_lost", "penalties")                                # <- EDIT: at least two numerical
+group_var  <- "era"                                         # <- EDIT: one categorical variable
 
 table(clean_data[[response]])       # must be 0/1; 1 = the outcome you predict
 
