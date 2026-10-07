@@ -30,3 +30,8 @@ ggplot(nfl_data, aes(x = fumbles_lost, y = penalties)) +
   geom_point(color = "blue", size = 2) +
   theme_minimal() +
   labs(title = "Scatterplot between fumbles and penatlies", x = "Fumbles Lost", y = "Penalties")
+
+# Correlation between penalties and fumbles lost
+cor(nfl_data$penalties, nfl_data$fumbles_lost) # ~0.0711
+
+# Model Fitting
