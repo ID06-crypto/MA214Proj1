@@ -99,23 +99,23 @@ mean(clean_data[[response]])        # share of 1s
 # ------------------------------------------------------------
 # 2. Candidate models (A fits, B compares)
 # ------------------------------------------------------------
-main_x <- "hp"                      # <- EDIT: the predictor your question is about
+main_x <- "turnovers"                      # <- EDIT: the predictor your question is about
 
-g1 <- glm(vs ~ hp, data = clean_data, family = binomial)           # <- EDIT: simple
-g2 <- glm(vs ~ hp + wt, data = clean_data, family = binomial)      # <- EDIT: multiple
-g3 <- glm(vs ~ hp + wt + am, data = clean_data, family = binomial) # <- EDIT: + categorical
+g1 <- glm(win_pct ~ turnovers, data = clean_data, family = binomial)           # <- EDIT: simple
+g2 <- glm(win_pct ~ turnovers + fumbles_lost, data = clean_data, family = binomial)      # <- EDIT: multiple
+g3 <- glm(win_pct ~ turnovers + fumbles_lost + yds_play + era, data = clean_data, family = binomial) # <- EDIT: + categorical
 
 # Model 4 is your choice.
-g4 <- glm(vs ~ hp + am, data = clean_data, family = binomial)      # <- EDIT
+g4 <- glm(win_pct ~ turnovers + yds_play + era, data = clean_data, family = binomial)      # <- EDIT
 
 # AIC: lower is better.
 AIC(g1, g2, g3, g4)
 
 # Accuracy: higher is better.
-mean((fitted(g1) > 0.5) == clean_data$vs)     # <- EDIT: your response
-mean((fitted(g2) > 0.5) == clean_data$vs)
-mean((fitted(g3) > 0.5) == clean_data$vs)
-mean((fitted(g4) > 0.5) == clean_data$vs)
+mean((fitted(g1) > 0.5) == clean_data$win_pct)     # <- EDIT: your response
+mean((fitted(g2) > 0.5) == clean_data$win_pct)
+mean((fitted(g3) > 0.5) == clean_data$win_pct)
+mean((fitted(g4) > 0.5) == clean_data$win_pct)
 
 cor(select(clean_data, all_of(predictors)))
 
